@@ -27,7 +27,7 @@ export class Transaction implements ITransaction {
   }
 
   get formattedAmount(): string {
-    const sign: string = this.type === 'income' ? '+' : '−';
+    const sign: string = this.type === TransactionType.Income ? '+' : '−';
     return `${sign}${formatCurrency(this.amount)}`;
   }
 

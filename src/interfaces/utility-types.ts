@@ -22,7 +22,8 @@ export type NullableDescription = Omit<ITransaction, 'description'> & {
   description: string | null;
 };
 
-export const limits: CategoryLimits = {
-  income: 10000,
-  expense: 5000,
+// Предельная сумма одной транзакции — используется при валидации ввода
+export const TRANSACTION_LIMITS: Readonly<CategoryLimits> = {
+  [TransactionType.Income]: 100_000_000,
+  [TransactionType.Expense]: 100_000_000,
 };

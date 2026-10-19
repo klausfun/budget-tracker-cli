@@ -8,7 +8,7 @@ import { ReadOnly } from '../decorators/ReadOnly';
 import { formatCurrency } from '../lib/budget-utils';
 import { IAccount } from '../interfaces/IAccount';
 import { ISummary } from '../interfaces/ISummary';
-import { TransactionType } from '../interfaces/TransactionType';
+import { TRANSACTION_TYPE_LABELS, TransactionType } from '../interfaces/TransactionType';
 import { AccountUpdate } from '../interfaces/utility-types';
 import { escapeCsvValue } from '../utils/escapeCsvValue';
 import { Transaction } from './Transaction';
@@ -18,7 +18,7 @@ const CSV_HEADER: string = 'id,amount,type,date,description';
 @LogClass
 export class Account implements IAccount, ISummary {
   @ReadOnly
-  public id: string;
+  public readonly id: string;
 
   @Metadata('description', 'Транзакции счёта')
   private transactions: Transaction[] = [];
@@ -32,15 +32,19 @@ export class Account implements IAccount, ISummary {
   }
 
   get income(): number {
-    return this.sumByType('income');
+    return this.sumByType(TransactionType.Income);
   }
 
   get expenses(): number {
-    return this.sumByType('expense');
+    return this.sumByType(TransactionType.Expense);
   }
 
   get balance(): number {
     return this.income - this.expenses;
+  }
+
+  get transactionCount(): number {
+    return this.transactions.length;
   }
 
   @LogMethod
@@ -58,9 +62,16 @@ export class Account implements IAccount, ISummary {
     return true;
   }
 
+  /** Копия списка транзакций, отсортированная по дате */
   @LogMethod
   getTransactions(): Transaction[] {
-    return [...this.transactions];
+    return [...this.transactions].sort(
+      (a: Transaction, b: Transaction) => Date.parse(a.date) - Date.parse(b.date),
+    );
+  }
+
+  clearTransactions(): void {
+    this.transactions = [];
   }
 
   update(update: AccountUpdate): void {
@@ -80,17 +91,29 @@ export class Account implements IAccount, ISummary {
   getSummaryString(): string {
     const description: string =
       getPropertyMetadata<string>('description', this, 'transactions') ?? 'Транзакции';
-    return `${this.name} [${this.shortId}]: баланс ${formatCurrency(this.balance)}. ${description}: ${this.transactions.length} шт.`;
+    return [
+      `Счёт «${this.name}» [${this.shortId}]`,
+      `Доходы: ${formatCurrency(this.income)} | Расходы: ${formatCurrency(this.expenses)} | Баланс: ${formatCurrency(this.balance)}`,
+      `${description}: ${this.transactions.length} шт.`,
+    ].join('\n');
   }
 
   toString(): string {
-    const lines: string[] = this.transactions.map((t: Transaction) => t.toString());
-    const body: string = lines.length > 0 ? lines.join('\n') : 'Транзакций пока нет';
-    return `${this.name} [${this.shortId}]\nСписок транзакций:\n${body}`;
+    const transactions: Transaction[] = this.getTransactions();
+    if (transactions.length === 0) {
+      return 'Транзакций пока нет';
+    }
+    const header: string = `${'№'.padEnd(3)} ${'Дата'.padEnd(19)} ${'Тип'.padEnd(7)} ${'Сумма'.padStart(18)}  Описание`;
+    const rows: string[] = transactions.map(
+      (t: Transaction, index: number) =>
+        `${String(index + 1).padEnd(3)} ${t.formattedDate.padEnd(19)} ${TRANSACTION_TYPE_LABELS[t.type].padEnd(7)} ${t.formattedAmount.padStart(18)}  ${t.description}`,
+    );
+    const line: string = '─'.repeat(header.length + 10);
+    return [header, line, ...rows].join('\n');
   }
 
   async exportTransactionsToCSV(filePath: string): Promise<void> {
-    const rows: string[] = this.transactions.map((t: Transaction) =>
+    const rows: string[] = this.getTransactions().map((t: Transaction) =>
       [t.id, t.amount, t.type, t.date, t.description].map(escapeCsvValue).join(','),
     );
     // BOM нужен, чтобы Excel правильно открыл кириллицу

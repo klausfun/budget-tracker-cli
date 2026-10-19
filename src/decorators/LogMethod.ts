@@ -1,3 +1,9 @@
+// Логи декораторов включаются переменной окружения BUDGET_DEBUG=1,
+// чтобы не засорять интерактивное меню при обычной работе
+export function isDecoratorLoggingEnabled(): boolean {
+  return process.env.BUDGET_DEBUG === '1';
+}
+
 export function LogMethod(
   _target: object,
   propertyKey: string,
@@ -6,9 +12,14 @@ export function LogMethod(
   const originalMethod = descriptor.value as (...args: unknown[]) => unknown;
 
   descriptor.value = function (this: unknown, ...args: unknown[]): unknown {
-    console.log(`Вызов метода ${propertyKey} с аргументами: ${JSON.stringify(args)}`);
+    const log: boolean = isDecoratorLoggingEnabled();
+    if (log) {
+      console.log(`Вызов метода ${propertyKey} с аргументами: ${JSON.stringify(args)}`);
+    }
     const result: unknown = originalMethod.apply(this, args);
-    console.log(`Метод ${propertyKey} вернул: ${JSON.stringify(result)}`);
+    if (log) {
+      console.log(`Метод ${propertyKey} вернул: ${JSON.stringify(result)}`);
+    }
     return result;
   };
 

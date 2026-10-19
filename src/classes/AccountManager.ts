@@ -21,20 +21,30 @@ export class AccountManager implements IAccountManager<Account>, ISummary {
   }
 
   addAccount(account: Account): void {
+    if (this.getAccountById(account.id)) {
+      throw new Error(`Счёт с id ${account.id} уже существует`);
+    }
     this.accounts.push(account);
   }
 
+  /** Удаляет счёт вместе со всеми его транзакциями */
   removeAccountById(accountId: string): boolean {
-    const index: number = this.accounts.findIndex((a: Account) => a.id === accountId);
-    if (index === -1) {
+    const account: Account | undefined = this.getAccountById(accountId);
+    if (!account) {
       return false;
     }
-    this.accounts.splice(index, 1);
+    account.clearTransactions();
+    this.accounts = this.accounts.filter((a: Account) => a.id !== accountId);
     return true;
   }
 
   getAccountById(id: string): Account | undefined {
     return this.accounts.find((a: Account) => a.id === id);
+  }
+
+  hasAccountWithName(name: string): boolean {
+    const normalized: string = name.trim().toLowerCase();
+    return this.accounts.some((a: Account) => a.name.trim().toLowerCase() === normalized);
   }
 
   getAccounts(): Account[] {
@@ -58,7 +68,9 @@ export class AccountManager implements IAccountManager<Account>, ISummary {
   }
 
   toString(): string {
-    const lines: string[] = this.accounts.map((a: Account) => a.getSummaryString());
+    const lines: string[] = this.accounts.map(
+      (a: Account) => `${a.name}: ${formatCurrency(a.balance)} (${a.transactionCount} тр.)`,
+    );
     return [...lines, this.getSummaryString()].join('\n');
   }
 }
