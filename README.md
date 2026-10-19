@@ -3,11 +3,16 @@
 Консольное приложение для учёта личных финансов: счета, доходы и расходы, баланс, экспорт в CSV.
 Учебный проект по дисциплине «Программирование на языке TypeScript и библиотеки фронтенд-разработки» (НИУ ВШЭ).
 
-**Состояние: ДЗ 10 — асинхронный код, экспорт в CSV.**
+**Состояние: ДЗ 11 — условные и сопоставленные типы.**
 
-- `src/utils/escapeCsvValue.ts` — значения с запятой, кавычками или переносом строки оборачиваются в кавычки, внутренние `"` удваиваются.
-- `Account.exportTransactionsToCSV(filePath): Promise<void>` — собирает CSV (`id,amount,type,date,description`) и асинхронно пишет файл через `fs/promises`. Каталог создаётся при необходимости, ошибки записи выбрасываются с понятным сообщением.
-- `npm start` создаёт `exports/main_account.csv` и показывает обработку ошибки записи.
+`src/interfaces/mapped-types.ts`:
+
+- `TransactionFieldType<TField>` — тип поля `ITransaction`, для чужого ключа `never`;
+- `OptionalTransaction<TFields>` — указанные поля становятся необязательными (пример — черновик `TransactionDraft`);
+- `ReadonlyTransactionFields<TFields>` — указанные поля только для чтения;
+- `IsIncome<T>` — `true`, если `type` у `T` — `'income'`.
+
+В `src/index.ts` типы проверяются на этапе компиляции (`Expect<Equal<…>>`): если тип посчитан неверно, `npm run typecheck` упадёт.
 
 ## Запуск
 
@@ -29,7 +34,8 @@ src/
 │   ├── IAccount.ts
 │   ├── ISummary.ts
 │   ├── IAccountManager.ts
-│   └── utility-types.ts
+│   ├── utility-types.ts
+│   └── mapped-types.ts
 ├── classes/
 │   ├── Transaction.ts
 │   ├── Account.ts
