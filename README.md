@@ -3,11 +3,11 @@
 Консольное приложение для учёта личных финансов: счета, доходы и расходы, баланс, экспорт в CSV.
 Учебный проект по дисциплине «Программирование на языке TypeScript и библиотеки фронтенд-разработки» (НИУ ВШЭ).
 
-**Состояние: ДЗ 9 — утилитные типы.**
+**Состояние: ДЗ 10 — асинхронный код, экспорт в CSV.**
 
-- `src/interfaces/utility-types.ts`: `TransactionUpdate` и `AccountUpdate` (`Partial`), `CompleteTransaction` (`Required`), `TransactionWithoutDescription` (`Omit`), `TransactionPreview` и `AccountInfo` (`Pick`), `CategoryLimits` (`Record`), `TransactionConstructorParams` и `TransactionInstance` (`ConstructorParameters`, `InstanceType`), `NullableDescription`.
-- Методы `Transaction.update()` и `Account.update()` для частичного обновления. У полей снят `readonly`, кроме `id`.
-- В `TransactionUpdate` нет `id` (`Partial<Omit<ITransaction, 'id'>>`) — идентификатор менять нельзя.
+- `src/utils/escapeCsvValue.ts` — значения с запятой, кавычками или переносом строки оборачиваются в кавычки, внутренние `"` удваиваются.
+- `Account.exportTransactionsToCSV(filePath): Promise<void>` — собирает CSV (`id,amount,type,date,description`) и асинхронно пишет файл через `fs/promises`. Каталог создаётся при необходимости, ошибки записи выбрасываются с понятным сообщением.
+- `npm start` создаёт `exports/main_account.csv` и показывает обработку ошибки записи.
 
 ## Запуск
 
@@ -37,5 +37,7 @@ src/
 ├── lib/
 │   ├── budget-utils.js
 │   └── budget-utils.d.ts
+├── utils/
+│   └── escapeCsvValue.ts
 └── index.ts
 ```
