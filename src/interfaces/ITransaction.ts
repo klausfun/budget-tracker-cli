@@ -1,11 +1,10 @@
-/// <reference path="TransactionType.ts" />
+import { TransactionType } from './TransactionType';
 
-namespace BudgetTracker {
-  export interface ITransaction {
-    id: number;
-    amount: number;
-    type: TransactionType;
-    date: string;
-    description: string;
-  }
+export interface ITransaction {
+  readonly id: string;
+  amount: number;
+  type: TransactionType;
+  /** Дата в формате ISO 8601 */
+  date: string;
+  description: string;
 }

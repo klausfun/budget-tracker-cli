@@ -1,64 +1,64 @@
-/// <reference path="../interfaces/IAccountManager.ts" />
-/// <reference path="Account.ts" />
+import { formatCurrency } from '../lib/budget-utils';
+import { IAccountManager } from '../interfaces/IAccountManager';
+import { ISummary } from '../interfaces/ISummary';
+import { Account } from './Account';
 
-namespace BudgetTracker {
-  export class AccountManager implements IAccountManager, ISummary {
-    private accounts: Account[] = [];
+const EMPTY_SUMMARY: ISummary = { income: 0, expenses: 0, balance: 0 };
 
-    get income(): number {
-      return this.accounts.reduce((sum: number, a: Account) => sum + a.income, 0);
+export class AccountManager implements IAccountManager<Account>, ISummary {
+  private accounts: Account[] = [];
+
+  get income(): number {
+    return this.accounts.reduce((sum: number, a: Account) => sum + a.income, 0);
+  }
+
+  get expenses(): number {
+    return this.accounts.reduce((sum: number, a: Account) => sum + a.expenses, 0);
+  }
+
+  get balance(): number {
+    return this.income - this.expenses;
+  }
+
+  addAccount(account: Account): void {
+    this.accounts.push(account);
+  }
+
+  removeAccountById(accountId: string): boolean {
+    const index: number = this.accounts.findIndex((a: Account) => a.id === accountId);
+    if (index === -1) {
+      return false;
     }
+    this.accounts.splice(index, 1);
+    return true;
+  }
 
-    get expenses(): number {
-      return this.accounts.reduce((sum: number, a: Account) => sum + a.expenses, 0);
-    }
+  getAccountById(id: string): Account | undefined {
+    return this.accounts.find((a: Account) => a.id === id);
+  }
 
-    get balance(): number {
-      return this.income - this.expenses;
-    }
+  getAccounts(): Account[] {
+    return [...this.accounts];
+  }
 
-    addAccount(account: Account): void {
-      this.accounts.push(account);
-    }
+  getAllAccounts(): Account[] {
+    return this.getAccounts();
+  }
 
-    removeAccountById(accountId: number): boolean {
-      const index: number = this.accounts.findIndex((a: Account) => a.id === accountId);
-      if (index === -1) {
-        return false;
-      }
-      this.accounts.splice(index, 1);
-      return true;
+  /** Без id — сводка по всем счетам, с id — по одному счёту */
+  getSummary(accountId?: string): ISummary {
+    if (accountId === undefined) {
+      return { income: this.income, expenses: this.expenses, balance: this.balance };
     }
+    return this.getAccountById(accountId)?.getSummary() ?? EMPTY_SUMMARY;
+  }
 
-    getAccountById(id: number): Account | undefined {
-      return this.accounts.find((a: Account) => a.id === id);
-    }
+  getSummaryString(): string {
+    return `Счетов: ${this.accounts.length} | Общий баланс: ${formatCurrency(this.balance)}`;
+  }
 
-    getAllAccounts(): Account[] {
-      return [...this.accounts];
-    }
-
-    getAccounts(): Account[] {
-      return this.getAllAccounts();
-    }
-
-    // Без id — сводка по всем счетам, с id — по конкретному счёту
-    getSummary(accountId?: number): ISummary {
-      if (accountId === undefined) {
-        return { income: this.income, expenses: this.expenses, balance: this.balance };
-      }
-      const account: Account | undefined = this.getAccountById(accountId);
-      return account ? account.getSummary() : { income: 0, expenses: 0, balance: 0 };
-    }
-
-    getSummaryString(): string {
-      return `Счетов: ${this.accounts.length}, общий баланс: ${this.balance} ₽`;
-    }
-
-    toString(): string {
-      const lines: string[] = this.accounts.map((a: Account) => a.getSummaryString());
-      const body: string = lines.length > 0 ? lines.join('\n') : 'Счетов пока нет';
-      return `Все бюджеты:\n${body}\n${this.getSummaryString()}`;
-    }
+  toString(): string {
+    const lines: string[] = this.accounts.map((a: Account) => a.getSummaryString());
+    return [...lines, this.getSummaryString()].join('\n');
   }
 }

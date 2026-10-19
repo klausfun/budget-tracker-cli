@@ -2,15 +2,21 @@
   "name": "budget-tracker-cli",
   "version": "1.0.0",
   "description": "Консольное приложение для учёта личных финансов на TypeScript",
-  "main": "dist/budget-tracker.js",
+  "main": "src/index.ts",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/budget-tracker.js",
-    "dev": "tsc --watch"
+    "start": "tsx src/index.ts",
+    "dev": "tsx watch src/index.ts",
+    "typecheck": "tsc --noEmit"
   },
   "author": "Artem Nemurov",
   "license": "ISC",
   "devDependencies": {
+    "tsx": "^4.23.15",
     "typescript": "^5.9.3"
+  },
+  "type": "module",
+  "dependencies": {
+    "moment": "^2.31.0",
+    "uuid": "^14.0.3"
   }
 }

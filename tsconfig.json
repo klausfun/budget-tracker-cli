@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "none",
-    "moduleResolution": "node",
-    "outFile": "./dist/budget-tracker.js",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "rootDir": "./src",
     "strict": true,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "noEmit": true
   },
   "include": ["src"]
 }
