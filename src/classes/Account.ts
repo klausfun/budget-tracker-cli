@@ -3,13 +3,14 @@ import { formatCurrency } from '../lib/budget-utils';
 import { IAccount } from '../interfaces/IAccount';
 import { ISummary } from '../interfaces/ISummary';
 import { TransactionType } from '../interfaces/TransactionType';
+import { AccountUpdate } from '../interfaces/utility-types';
 import { Transaction } from './Transaction';
 
 export class Account implements IAccount, ISummary {
   public readonly id: string;
   private transactions: Transaction[] = [];
 
-  constructor(public readonly name: string) {
+  constructor(public name: string) {
     this.id = uuidv4();
   }
 
@@ -44,6 +45,12 @@ export class Account implements IAccount, ISummary {
 
   getTransactions(): Transaction[] {
     return [...this.transactions];
+  }
+
+  update(update: AccountUpdate): void {
+    if (update.name !== undefined) {
+      this.name = update.name;
+    }
   }
 
   getSummary(): ISummary {

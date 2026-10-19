@@ -3,11 +3,11 @@
 Консольное приложение для учёта личных финансов: счета, доходы и расходы, баланс, экспорт в CSV.
 Учебный проект по дисциплине «Программирование на языке TypeScript и библиотеки фронтенд-разработки» (НИУ ВШЭ).
 
-**Состояние: ДЗ 8 — declaration files.**
+**Состояние: ДЗ 9 — утилитные типы.**
 
-- Проект переведён с `namespace` на ES-модули (`"module": "ESNext"`, `"type": "module"`), запуск через `tsx`.
-- Сторонние библиотеки с типами: `uuid` генерирует строковые id счетов и транзакций, `moment` форматирует даты.
-- Своя нетипизированная библиотека `src/lib/budget-utils.js` (функция `formatCurrency`) и декларация типов к ней `src/lib/budget-utils.d.ts`.
+- `src/interfaces/utility-types.ts`: `TransactionUpdate` и `AccountUpdate` (`Partial`), `CompleteTransaction` (`Required`), `TransactionWithoutDescription` (`Omit`), `TransactionPreview` и `AccountInfo` (`Pick`), `CategoryLimits` (`Record`), `TransactionConstructorParams` и `TransactionInstance` (`ConstructorParameters`, `InstanceType`), `NullableDescription`.
+- Методы `Transaction.update()` и `Account.update()` для частичного обновления. У полей снят `readonly`, кроме `id`.
+- В `TransactionUpdate` нет `id` (`Partial<Omit<ITransaction, 'id'>>`) — идентификатор менять нельзя.
 
 ## Запуск
 
@@ -28,7 +28,8 @@ src/
 │   ├── ITransaction.ts
 │   ├── IAccount.ts
 │   ├── ISummary.ts
-│   └── IAccountManager.ts
+│   ├── IAccountManager.ts
+│   └── utility-types.ts
 ├── classes/
 │   ├── Transaction.ts
 │   ├── Account.ts

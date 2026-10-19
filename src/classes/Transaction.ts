@@ -4,15 +4,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { formatCurrency } from '../lib/budget-utils';
 import { ITransaction } from '../interfaces/ITransaction';
 import { TRANSACTION_TYPE_LABELS, TransactionType } from '../interfaces/TransactionType';
+import { TransactionUpdate } from '../interfaces/utility-types';
 
 export class Transaction implements ITransaction {
   public readonly id: string;
 
   constructor(
-    public readonly amount: number,
-    public readonly type: TransactionType,
-    public readonly date: string,
-    public readonly description: string,
+    public amount: number,
+    public type: TransactionType,
+    public date: string,
+    public description: string,
   ) {
     this.id = uuidv4();
   }
@@ -28,6 +29,10 @@ export class Transaction implements ITransaction {
   get formattedAmount(): string {
     const sign: string = this.type === 'income' ? '+' : '−';
     return `${sign}${formatCurrency(this.amount)}`;
+  }
+
+  update(update: TransactionUpdate): void {
+    Object.assign(this, update);
   }
 
   toString(): string {
