@@ -3,16 +3,16 @@
 Консольное приложение для учёта личных финансов: счета, доходы и расходы, баланс, экспорт в CSV.
 Учебный проект по дисциплине «Программирование на языке TypeScript и библиотеки фронтенд-разработки» (НИУ ВШЭ).
 
-**Состояние: ДЗ 11 — условные и сопоставленные типы.**
+**Состояние: ДЗ 12 — декораторы и метапрограммирование.**
 
-`src/interfaces/mapped-types.ts`:
+В `tsconfig.json` включены `experimentalDecorators` и `emitDecoratorMetadata`. Декораторы в `src/decorators/` применены к классу `Account`:
 
-- `TransactionFieldType<TField>` — тип поля `ITransaction`, для чужого ключа `never`;
-- `OptionalTransaction<TFields>` — указанные поля становятся необязательными (пример — черновик `TransactionDraft`);
-- `ReadonlyTransactionFields<TFields>` — указанные поля только для чтения;
-- `IsIncome<T>` — `true`, если `type` у `T` — `'income'`.
+- `@LogClass` — пишет в консоль, когда создаётся счёт, и с какими аргументами;
+- `@LogMethod` на `addTransaction`, `removeTransactionById`, `getTransactions` — пишет вызов с аргументами и возвращённое значение;
+- `@ReadOnly` на `id` — значение задаётся один раз в конструкторе, повторная запись выбрасывает ошибку;
+- `@Metadata('description', …)` на `transactions` — описание хранится через `reflect-metadata` и выводится в `getSummaryString()`.
 
-В `src/index.ts` типы проверяются на этапе компиляции (`Expect<Equal<…>>`): если тип посчитан неверно, `npm run typecheck` упадёт.
+`npm start` показывает все четыре декоратора, включая попытку изменить `id`.
 
 ## Запуск
 
@@ -45,5 +45,10 @@ src/
 │   └── budget-utils.d.ts
 ├── utils/
 │   └── escapeCsvValue.ts
+├── decorators/
+│   ├── LogClass.ts
+│   ├── LogMethod.ts
+│   ├── Metadata.ts
+│   └── ReadOnly.ts
 └── index.ts
 ```

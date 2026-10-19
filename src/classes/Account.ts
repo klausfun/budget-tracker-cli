@@ -1,6 +1,10 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
+import { LogClass } from '../decorators/LogClass';
+import { LogMethod } from '../decorators/LogMethod';
+import { getPropertyMetadata, Metadata } from '../decorators/Metadata';
+import { ReadOnly } from '../decorators/ReadOnly';
 import { formatCurrency } from '../lib/budget-utils';
 import { IAccount } from '../interfaces/IAccount';
 import { ISummary } from '../interfaces/ISummary';
@@ -11,8 +15,12 @@ import { Transaction } from './Transaction';
 
 const CSV_HEADER: string = 'id,amount,type,date,description';
 
+@LogClass
 export class Account implements IAccount, ISummary {
-  public readonly id: string;
+  @ReadOnly
+  public id: string;
+
+  @Metadata('description', 'Транзакции счёта')
   private transactions: Transaction[] = [];
 
   constructor(public name: string) {
@@ -35,10 +43,12 @@ export class Account implements IAccount, ISummary {
     return this.income - this.expenses;
   }
 
+  @LogMethod
   addTransaction(transaction: Transaction): void {
     this.transactions.push(transaction);
   }
 
+  @LogMethod
   removeTransactionById(transactionId: string): boolean {
     const index: number = this.transactions.findIndex((t: Transaction) => t.id === transactionId);
     if (index === -1) {
@@ -48,6 +58,7 @@ export class Account implements IAccount, ISummary {
     return true;
   }
 
+  @LogMethod
   getTransactions(): Transaction[] {
     return [...this.transactions];
   }
@@ -67,7 +78,9 @@ export class Account implements IAccount, ISummary {
   }
 
   getSummaryString(): string {
-    return `${this.name} [${this.shortId}]: баланс ${formatCurrency(this.balance)}, транзакций: ${this.transactions.length}`;
+    const description: string =
+      getPropertyMetadata<string>('description', this, 'transactions') ?? 'Транзакции';
+    return `${this.name} [${this.shortId}]: баланс ${formatCurrency(this.balance)}. ${description}: ${this.transactions.length} шт.`;
   }
 
   toString(): string {
